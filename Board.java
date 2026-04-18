@@ -99,7 +99,7 @@ public class Board {
         String kingCaptureSuffix = "" + (char) ('a' + king[1]) + (king[0] + 1);
 
         // look at opponent's next moves
-        String oppColor = (color == "w") ? "b" : "w";
+        String oppColor = (color.equals("w")) ? "b" : "w";
         ArrayList<Move> possibleNextMoves = get1LayerLegalMoves(board, oppColor);
         for (Move m : possibleNextMoves) {
             if (m.toString().endsWith(kingCaptureSuffix)) {

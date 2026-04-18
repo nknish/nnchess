@@ -11,7 +11,7 @@ public class Move {
     }
 
     public String toString() {
-        String chr = (p.getType()=="p") ? "" : p.getType();
+        String chr = (p.getType().equals("p")) ? "" : p.getType();
         String from = "" + (char)('a' + fromY) + (fromX+1);
         String to = "" + (char)('a' + toY) + (toX+1);
         return chr + from + to;
