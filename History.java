@@ -1,21 +1,24 @@
+// TODO check for off-by-one errors in 50-move and 3-move
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class History {
     private ArrayList<Board> h;
-    private boolean whiteCanOO;
-    private boolean whiteCanOOO;
-    private boolean blackCanOO;
-    private boolean blackCanOOO;
+    private int whiteLostOO;
+    private int whiteLostOOO;
+    private int blackLostOO;
+    private int blackLostOOO;
     private int enPassantX;
     private int enPassantY;
 
     public History(Board initialBoard) {
         h = new ArrayList<>();
         h.add(initialBoard);
-        whiteCanOO = true;
-        whiteCanOOO = true;
-        blackCanOO = true;
-        blackCanOOO = true;
+        whiteLostOO = -1;
+        whiteLostOOO = -1;
+        blackLostOO = -1;
+        blackLostOOO = -1;
         enPassantX = -1;
         enPassantY = -1;
     }
@@ -29,44 +32,44 @@ public class History {
 
     private void logKingMoves(Board b) {
         // check for king moves
-        if (whiteCanOO || whiteCanOOO) {
+        if (whiteHasKingsideCastle() || whiteHasQueensideCastle()) {
             if (!b.getPiece(0, 4).getType().equals("k")) {
-                whiteCanOO = false;
-                whiteCanOOO = false;
+                whiteLostOO = getMoveNumber();
+                whiteLostOOO = getMoveNumber();
             }
         }
-        if (blackCanOO || blackCanOOO) {
+        if (blackHasKingsideCastle() || blackHasQueensideCastle()) {
             if (!b.getPiece(7, 4).getType().equals("k")) {
-                blackCanOO = false;
-                blackCanOOO = false;
+                blackLostOO = getMoveNumber();
+                blackLostOOO = getMoveNumber();
             }
         }
     }
 
     private void logRookMovesAndCaptures(Board b) {
         // check for rook moves/captures
-        if (whiteCanOO) {
+        if (whiteHasKingsideCastle()) {
             Piece p = b.getPiece(0, 7);
             if (!p.getType().equals("r") || !p.getColor().equals("w")) {
-                whiteCanOO = false;
+                whiteLostOO = getMoveNumber();
             }
         }
-        if (!whiteCanOOO) {
+        if (whiteHasQueensideCastle()) {
             Piece p = b.getPiece(0, 0);
             if (!p.getType().equals("r") || !p.getColor().equals("w")) {
-                whiteCanOOO = false;
+                whiteLostOOO = getMoveNumber();
             }
         }
-        if (blackCanOO) {
+        if (blackHasKingsideCastle()) {
             Piece p = b.getPiece(7, 7);
             if (!p.getType().equals("r") || !p.getColor().equals("b")) {
-                blackCanOO = false;
+                blackLostOO = getMoveNumber();
             }
         }
-        if (!blackCanOOO) {
+        if (blackHasQueensideCastle()) {
             Piece p = b.getPiece(7, 0);
             if (!p.getType().equals("r") || !p.getColor().equals("b")) {
-                blackCanOOO = false;
+                blackLostOOO = getMoveNumber();
             }
         }
     }
@@ -97,20 +100,24 @@ public class History {
         }
     }
 
-    public boolean whiteCanKingsideCastleBasedOnHistory() {
-        return whiteCanOO;
+    private int getMoveNumber() {
+        return h.size() - 1;
     }
 
-    public boolean whiteCanQueensideCastleBasedOnHistory() {
-        return whiteCanOOO;
+    public boolean whiteHasKingsideCastle() {
+        return whiteLostOO == -1;
     }
 
-    public boolean blackCanKingsideCastleBasedOnHistory() {
-        return blackCanOO;
+    public boolean whiteHasQueensideCastle() {
+        return whiteLostOOO == -1;
     }
 
-    public boolean blackCanQueensideCastleBasedOnHistory() {
-        return blackCanOOO;
+    public boolean blackHasKingsideCastle() {
+        return blackLostOO == -1;
+    }
+
+    public boolean blackHasQueensideCastle() {
+        return blackLostOOO == -1;
     }
 
     public boolean canEnPassantTo(int x, int y) {
@@ -118,16 +125,33 @@ public class History {
     }
 
     public boolean hit3MoveRepetition() {
-        // TODO implement 3 move repetition
-        // must consider: boards that look the same but have different castling rights are considered distinct
+        int repeats = 1;
+        Board now = h.getLast();
+        int piecesNow = countPieces(now);
 
+        // lookback window ends when castling rights changed (or 0)
+        int mostRecentCastlingRightsChange = Math.max(
+            Math.max(whiteLostOO, whiteLostOOO), 
+            Math.max(blackLostOO, (blackLostOOO == -1) ? 0 : blackLostOOO)
+        );
+        List<Board> lookback = h.subList(mostRecentCastlingRightsChange, h.size()).reversed();
+
+        // count each identical board in the lookback window
+        for (Board old : lookback) {
+            if (countPieces(old) != piecesNow) return false;
+            if (now.equals(old)) {
+                repeats ++;
+                if (repeats == 3)
+                    return true;
+            }
+        }
         return false;
     }
 
     public boolean hit50Move() {
-        if (h.size() <= 50) return false;
+        if (h.size() <= 100) return false;
         Board now = h.getLast();
-        Board old = h.get(h.size()-51);
+        Board old = h.get(h.size()-101);
 
         if (!boardsHaveSameNumberOfPieces(now, old)) return false;
         return allPawnsInSamePositions(now, old);
@@ -135,19 +159,21 @@ public class History {
 
     private boolean boardsHaveSameNumberOfPieces(Board b1, Board b2) {
         // compare piece numbers (different # == capture)
-        int numPiecesB1 = 0;
-        int numPiecesB2 = 0;
+        int numPiecesB1 = countPieces(b1);
+        int numPiecesB2 = countPieces(b2);
+        return numPiecesB1 == numPiecesB2;
+    }
+
+    private int countPieces(Board b) {
+        int n = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (b1.getPiece(i, j) != null) {
-                    numPiecesB1++;
-                }
-                if (b2.getPiece(i, j) != null) {
-                    numPiecesB2++;
+                if (b.getPiece(i, j) != null) {
+                    n++;
                 }
             }
         }
-        return numPiecesB1 == numPiecesB2;
+        return n;
     }
 
     private boolean allPawnsInSamePositions(Board b1, Board b2) {
