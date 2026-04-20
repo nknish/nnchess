@@ -2,24 +2,20 @@ import java.util.ArrayList;
 
 public class History {
     private ArrayList<Board> h;
-    private boolean whiteKingMoved;
-    private boolean whiteKingsideRookMoved;
-    private boolean whiteQueensideRookMoved;
-    private boolean blackKingMoved;
-    private boolean blackKingsideRookMoved;
-    private boolean blackQueensideRookMoved;
+    private boolean whiteCanOO;
+    private boolean whiteCanOOO;
+    private boolean blackCanOO;
+    private boolean blackCanOOO;
     private int enPassantX;
     private int enPassantY;
 
     public History(Board initialBoard) {
         h = new ArrayList<>();
         h.add(initialBoard);
-        whiteKingMoved = false;
-        whiteKingsideRookMoved = false;
-        whiteQueensideRookMoved = false;
-        blackKingMoved = false;
-        blackKingsideRookMoved = false;
-        blackQueensideRookMoved = false;
+        whiteCanOO = true;
+        whiteCanOOO = true;
+        blackCanOO = true;
+        blackCanOOO = true;
         enPassantX = -1;
         enPassantY = -1;
     }
@@ -33,42 +29,44 @@ public class History {
 
     private void logKingMoves(Board b) {
         // check for king moves
-        if (!whiteKingMoved) {
+        if (whiteCanOO || whiteCanOOO) {
             if (!b.getPiece(0, 4).getType().equals("k")) {
-                whiteKingMoved = true;
+                whiteCanOO = false;
+                whiteCanOOO = false;
             }
         }
-        if (!blackKingMoved) {
+        if (blackCanOO || blackCanOOO) {
             if (!b.getPiece(7, 4).getType().equals("k")) {
-                blackKingMoved = true;
+                blackCanOO = false;
+                blackCanOOO = false;
             }
         }
     }
 
     private void logRookMovesAndCaptures(Board b) {
         // check for rook moves/captures
-        if (!whiteKingsideRookMoved) {
+        if (whiteCanOO) {
             Piece p = b.getPiece(0, 7);
             if (!p.getType().equals("r") || !p.getColor().equals("w")) {
-                whiteKingsideRookMoved = true;
+                whiteCanOO = false;
             }
         }
-        if (!whiteQueensideRookMoved) {
+        if (!whiteCanOOO) {
             Piece p = b.getPiece(0, 0);
             if (!p.getType().equals("r") || !p.getColor().equals("w")) {
-                whiteQueensideRookMoved = true;
+                whiteCanOOO = false;
             }
         }
-        if (!blackKingsideRookMoved) {
+        if (blackCanOO) {
             Piece p = b.getPiece(7, 7);
             if (!p.getType().equals("r") || !p.getColor().equals("b")) {
-                blackKingsideRookMoved = true;
+                blackCanOO = false;
             }
         }
-        if (!blackQueensideRookMoved) {
+        if (!blackCanOOO) {
             Piece p = b.getPiece(7, 0);
             if (!p.getType().equals("r") || !p.getColor().equals("b")) {
-                blackQueensideRookMoved = true;
+                blackCanOOO = false;
             }
         }
     }
@@ -100,19 +98,19 @@ public class History {
     }
 
     public boolean whiteCanKingsideCastleBasedOnHistory() {
-        return !whiteKingMoved && !whiteKingsideRookMoved;
+        return whiteCanOO;
     }
 
     public boolean whiteCanQueensideCastleBasedOnHistory() {
-        return !whiteKingMoved && !whiteQueensideRookMoved;
+        return whiteCanOOO;
     }
 
     public boolean blackCanKingsideCastleBasedOnHistory() {
-        return !blackKingMoved && !blackKingsideRookMoved;
+        return blackCanOO;
     }
 
     public boolean blackCanQueensideCastleBasedOnHistory() {
-        return !blackKingMoved && !blackQueensideRookMoved;
+        return blackCanOOO;
     }
 
     public boolean canEnPassantTo(int x, int y) {
