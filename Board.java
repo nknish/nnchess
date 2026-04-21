@@ -4,7 +4,7 @@ public class Board {
     public Board() {
         // fresh new board
         pieces = new Piece[8][8];
-        for (int i : new int[] {0, 7}) {
+        for (int i : new int[] { 0, 7 }) {
             pieces[i][0] = new Piece("r", i == 0 ? "w" : "b");
             pieces[i][1] = new Piece("n", i == 0 ? "w" : "b");
             pieces[i][2] = new Piece("b", i == 0 ? "w" : "b");
@@ -25,11 +25,16 @@ public class Board {
 
     private Board(Piece[][] oldPieces) {
         // copy of the board
+        pieces = new Piece[8][8];
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Piece oldPiece = oldPieces[i][j];
-                Piece newPiece = new Piece(oldPiece.getType(), oldPiece.getColor());
-                pieces[i][j] = newPiece;
+                if (oldPiece == null) {
+                    pieces[i][j] = null;
+                } else {
+                    Piece newPiece = new Piece(oldPiece.getType(), oldPiece.getColor());
+                    pieces[i][j] = newPiece;
+                }
             }
         }
     }
@@ -51,35 +56,59 @@ public class Board {
         System.out.println("    a b c d e f g h");
     }
 
-    public Board getState() {
+    public Board getCopy() {
         return new Board(pieces);
     }
 
     public Piece getPiece(int x, int y) {
         Piece p = pieces[x][y];
-        if (p == null) return null;
+        if (p == null)
+            return null;
         return p.clone();
     }
-    
+
+    public int[] findKing(String c) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (pieces[i][j] != null && pieces[i][j].getType().equals("k") && pieces[i][j].getColor().equals(c)) {
+                    return new int[] { i, j };
+                }
+            }
+        }
+        throw new RuntimeException(c + " king not found");
+    }
+
+    public int countPieces() {
+        int n = 0;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (pieces[i][j] != null) {
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
+
     public void makeMove(Move move) {
         // remove piece from spot (save color)
         int[] from = move.getFrom();
-        String color = pieces[from[0]][from[1]].getColor();
+        Piece p = pieces[from[0]][from[1]];
         pieces[from[0]][from[1]] = null;
-        
+
         // put piece in new spot
         int[] to = move.getTo();
-        pieces[to[0]][to[1]] = new Piece(move.piece, color);
+        pieces[to[0]][to[1]] = new Piece(p.getType(), p.getColor());
 
         // handle special moves
         if (move.isCastle()) {
             if (to[1] == 6) {
                 // kingside
-                pieces[from[0]][5] = new Piece("r", color);
+                pieces[from[0]][5] = new Piece("r", p.getColor());
                 pieces[from[0]][7] = null;
             } else {
                 // queenside
-                pieces[from[0]][3] = new Piece("r", color);
+                pieces[from[0]][3] = new Piece("r", p.getColor());
                 pieces[from[0]][0] = null;
             }
         }
@@ -87,7 +116,16 @@ public class Board {
             pieces[from[0]][to[1]] = null;
         }
         if (move.isPromotion()) {
-            pieces[to[0]][to[1]] = new Piece(move.getPromotionPiece(), color);
+            pieces[to[0]][to[1]] = new Piece(move.getPromotionPiece(), p.getColor());
         }
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        return (anObject instanceof Board aBoard)
+                && (this.toString().equals(aBoard.toString()));
     }
 }

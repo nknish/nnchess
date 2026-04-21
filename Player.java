@@ -37,6 +37,7 @@ public class Player {
 
     private Move getComputerMove(List<Move> moves) {
         // pick a random legal move
+        System.out.println("getting computer move");
         int rand = (int) (Math.random() * moves.size());
         return moves.get(rand);
     }

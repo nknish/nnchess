@@ -24,6 +24,8 @@ public class History {
     }
 
     public void logBoard(Board b) {
+        enPassantX = -1;
+        enPassantY = -1;
         h.add(b);
         logKingMoves(b);
         logRookMovesAndCaptures(b);
@@ -32,14 +34,16 @@ public class History {
 
     private void logKingMoves(Board b) {
         // check for king moves
-        if (whiteHasKingsideCastle() || whiteHasQueensideCastle()) {
-            if (!b.getPiece(0, 4).getType().equals("k")) {
+        if (hasKingsideCastle("w") || hasQueensideCastle("w")) {
+            Piece p = b.getPiece(0, 4);
+            if (p == null || !p.getType().equals("k") || !p.getColor().equals("w")) {
                 whiteLostOO = getMoveNumber();
                 whiteLostOOO = getMoveNumber();
             }
         }
-        if (blackHasKingsideCastle() || blackHasQueensideCastle()) {
-            if (!b.getPiece(7, 4).getType().equals("k")) {
+        if (hasKingsideCastle("b") || hasQueensideCastle("b")) {
+            Piece p = b.getPiece(7, 4);
+            if (p == null || !p.getType().equals("k") || !p.getColor().equals("b")) {
                 blackLostOO = getMoveNumber();
                 blackLostOOO = getMoveNumber();
             }
@@ -48,27 +52,27 @@ public class History {
 
     private void logRookMovesAndCaptures(Board b) {
         // check for rook moves/captures
-        if (whiteHasKingsideCastle()) {
+        if (hasKingsideCastle("w")) {
             Piece p = b.getPiece(0, 7);
-            if (!p.getType().equals("r") || !p.getColor().equals("w")) {
+            if (p == null || !p.getType().equals("r") || !p.getColor().equals("w")) {
                 whiteLostOO = getMoveNumber();
             }
         }
-        if (whiteHasQueensideCastle()) {
+        if (hasQueensideCastle("w")) {
             Piece p = b.getPiece(0, 0);
-            if (!p.getType().equals("r") || !p.getColor().equals("w")) {
+            if (p == null || !p.getType().equals("r") || !p.getColor().equals("w")) {
                 whiteLostOOO = getMoveNumber();
             }
         }
-        if (blackHasKingsideCastle()) {
+        if (hasKingsideCastle("b")) {
             Piece p = b.getPiece(7, 7);
-            if (!p.getType().equals("r") || !p.getColor().equals("b")) {
+            if (p == null || !p.getType().equals("r") || !p.getColor().equals("b")) {
                 blackLostOO = getMoveNumber();
             }
         }
-        if (blackHasQueensideCastle()) {
+        if (hasQueensideCastle("b")) {
             Piece p = b.getPiece(7, 0);
-            if (!p.getType().equals("r") || !p.getColor().equals("b")) {
+            if (p == null || !p.getType().equals("r") || !p.getColor().equals("b")) {
                 blackLostOOO = getMoveNumber();
             }
         }
@@ -83,7 +87,7 @@ public class History {
             if (p == null) continue;
             if (!p.getType().equals("") || !p.getColor().equals("w"))
                 continue;
-            if (prev.getPiece(3, i) == null && b.getPiece(1, i) == null && prev.getPiece(1, i).getType().equals("")) {
+            if (prev.getPiece(3, i) == null && b.getPiece(1, i) == null && prev.getPiece(1, i) != null && prev.getPiece(1, i).getType().equals("")) {
                 enPassantX = 2;
                 enPassantY = i;
             }
@@ -93,7 +97,7 @@ public class History {
             if (p == null) continue;
             if (!p.getType().equals("") || !p.getColor().equals("b"))
                 continue;
-            if (prev.getPiece(4, i) == null && b.getPiece(6, i) == null && prev.getPiece(6, i).getType().equals("")) {
+            if (prev.getPiece(4, i) == null && b.getPiece(6, i) == null && prev.getPiece(6, i) != null && prev.getPiece(6, i).getType().equals("")) {
                 enPassantX = 5;
                 enPassantY = i;
             }
@@ -104,20 +108,16 @@ public class History {
         return h.size() - 1;
     }
 
-    public boolean whiteHasKingsideCastle() {
-        return whiteLostOO == -1;
+    public boolean hasKingsideCastle(String c) {
+        if (c.equals("w")) return whiteLostOO == -1;
+        else if (c.equals("b")) return blackLostOO == -1;
+        else throw new IllegalArgumentException("only colors are 'b' or 'w'");
     }
-
-    public boolean whiteHasQueensideCastle() {
-        return whiteLostOOO == -1;
-    }
-
-    public boolean blackHasKingsideCastle() {
-        return blackLostOO == -1;
-    }
-
-    public boolean blackHasQueensideCastle() {
-        return blackLostOOO == -1;
+    
+    public boolean hasQueensideCastle(String c) {
+        if (c.equals("w")) return whiteLostOOO == -1;
+        else if (c.equals("b")) return blackLostOOO == -1;
+        else throw new IllegalArgumentException("only colors are 'b' or 'w'");
     }
 
     public boolean canEnPassantTo(int x, int y) {
@@ -127,7 +127,7 @@ public class History {
     public boolean hit3MoveRepetition() {
         int repeats = 1;
         Board now = h.getLast();
-        int piecesNow = countPieces(now);
+        int piecesNow = now.countPieces();
 
         // lookback window ends when castling rights changed (or 0)
         int mostRecentCastlingRightsChange = Math.max(
@@ -138,7 +138,7 @@ public class History {
 
         // count each identical board in the lookback window
         for (Board old : lookback) {
-            if (countPieces(old) != piecesNow) return false;
+            if (old.countPieces() != piecesNow) return false;
             if (now.equals(old)) {
                 repeats ++;
                 if (repeats == 3)
@@ -159,21 +159,9 @@ public class History {
 
     private boolean boardsHaveSameNumberOfPieces(Board b1, Board b2) {
         // compare piece numbers (different # == capture)
-        int numPiecesB1 = countPieces(b1);
-        int numPiecesB2 = countPieces(b2);
+        int numPiecesB1 = b1.countPieces();
+        int numPiecesB2 = b2.countPieces();
         return numPiecesB1 == numPiecesB2;
-    }
-
-    private int countPieces(Board b) {
-        int n = 0;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (b.getPiece(i, j) != null) {
-                    n++;
-                }
-            }
-        }
-        return n;
     }
 
     private boolean allPawnsInSamePositions(Board b1, Board b2) {

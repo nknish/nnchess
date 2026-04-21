@@ -1,10 +1,19 @@
 public class Move {
-    String piece;
-    int fromX, fromY, toX, toY;
-    boolean isEnPassant;
-    boolean isCastle;
-    String promotionPiece;
+    private String piece;
+    private int fromX, fromY, toX, toY;
+    private boolean isEnPassant;
+    private boolean isCastle;
+    private String promotionPiece;
 
+    public Move(String piece, int fromX, int fromY, int toX, int toY) {
+        this.piece = piece;
+        this.fromX = fromX;
+        this.fromY = fromY;
+        this.toX = toX;
+        this.toY = toY;
+        validateCoords(fromX, fromY, toX, toY);
+    }
+    
     public Move(String piece, int fromX, int fromY, int toX, int toY, String special) {
         this.piece = piece;
         this.fromX = fromX;
@@ -25,6 +34,13 @@ public class Move {
             promotionPiece = special;
         } else {
             throw new IllegalArgumentException("special can only be 'ep', 'castle', or promotion piece ('q', 'r', 'b', 'n'");
+        }
+        validateCoords(fromX, fromY, toX, toY);
+    }
+
+    private void validateCoords(int fromX, int fromY, int toX, int toY) {
+        if (fromX < 0 || fromX > 7 || fromY < 0 || fromY > 7 || toX < 0 || toX > 7 || toY < 0 || toY > 7) {
+            throw new IllegalArgumentException("coords of move oob: (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")");
         }
     }
 

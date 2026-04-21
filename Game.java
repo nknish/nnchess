@@ -10,42 +10,51 @@ public class Game {
 
     public Game() {
         b = new Board();
-        h = new History(b);
+        h = new History(b.getCopy());
         v = new Validator();
         white = new Player(true);
         black = new Player(false);
         whiteToMove = true;
     }
 
-    public void move() {
+    public void display() {
+        System.out.println();
         b.display();
+    }
+
+    public void move() {
         Player p = whiteToMove ? white : black;
         String c = whiteToMove ? "w" : "b";
         Move m = move(p, c);
         if (!p.isHuman()) {
             System.out.println(c + " moved " + m.toString());
         }
+        whiteToMove = !whiteToMove;
     }
 
     private Move move(Player p, String color) {
-        List<Move> moves = v.getMoves(b.getState(), h, color);
+        List<Move> moves = v.getMoves(b.getCopy(), h, color);
         Move move = p.getMove(moves);
         b.makeMove(move);
-        h.logBoard(b.getState());
+        h.logBoard(b.getCopy());
         return move;
     }
 
     public boolean isOver() {
-        if (h.hit3MoveRepetition()) return true;
-        if (h.hit50Move()) return true;
-        if (v.bothInsufficientMaterial(b)) return true;
-        List<Move> moves = whiteToMove ? v.getMoves(b, h, "w") : v.getMoves(b, h, "b");
-        if (moves.size() == 0) return true;
+        if (h.hit3MoveRepetition())
+            return true;
+        if (h.hit50Move())
+            return true;
+        if (v.bothInsufficientMaterial(b.getCopy()))
+            return true;
+        List<Move> moves = whiteToMove ? v.getMoves(b.getCopy(), h, "w") : v.getMoves(b.getCopy(), h, "b");
+        if (moves.size() == 0)
+            return true;
         return false;
     }
 
     public String outcome() {
-        if (v.isCheckmate(b, whiteToMove ? "w" : "b")) {
+        if (v.isCheckmated(b.getCopy(), h, whiteToMove ? "w" : "b")) {
             if (whiteToMove) {
                 return "checkmate! black wins";
             } else {
