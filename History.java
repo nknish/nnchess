@@ -11,6 +11,7 @@ public class History {
     private int blackLostOOO;
     private int enPassantX;
     private int enPassantY;
+    private int halfmoveClock;
 
     public History(Board initialBoard) {
         h = new ArrayList<>();
@@ -21,6 +22,7 @@ public class History {
         blackLostOOO = -1;
         enPassantX = -1;
         enPassantY = -1;
+        halfmoveClock = 0;
     }
 
     public void logBoard(Board b) {
@@ -30,6 +32,7 @@ public class History {
         logKingMoves(b);
         logRookMovesAndCaptures(b);
         logPawn2SquareMoves(b);
+        tickHalfmoveClock(b);
     }
 
     private void logKingMoves(Board b) {
@@ -102,7 +105,63 @@ public class History {
                 enPassantY = i;
             }
         }
+        if (enPassantX != -1) {
+            System.out.println("possible ep on " + enPassantX + "," + enPassantY);
+        }
     }
+
+    private void tickHalfmoveClock(Board b) {
+        Board prev = h.get(h.size() - 2);
+
+        // check for captures
+        if (b.countPieces() != prev.countPieces()) {
+            halfmoveClock = 0;
+            return;
+        }
+
+        // check for pawn moves
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Piece p1 = b.getPiece(i, j);
+                Piece p2 = prev.getPiece(i, j);
+
+                // both null
+                if (p1 == null && p2 == null) continue;
+
+                // 1 null
+                if (p1 == null) {
+                    if (p2.getType().equals("")) {
+                        halfmoveClock = 0;
+                        return;
+                    } else {
+                        continue;
+                    }
+                }
+                if (p2 == null) {
+                    if (p1.getType().equals("")) {
+                        halfmoveClock = 0;
+                        return;
+                    } else {
+                        continue;
+                    }
+                }
+
+                // neither null
+                if (p1.getType().equals("") && !p2.getType().equals("")) {
+                    halfmoveClock = 0;
+                    return;
+                }
+                if (p2.getType().equals("") && !p1.getType().equals("")) {
+                    halfmoveClock = 0;
+                    return;
+                }
+            }
+        }
+
+        // if neither, tick the clock
+        halfmoveClock++;
+    }
+
 
     private int getMoveNumber() {
         return h.size() - 1;
@@ -149,38 +208,22 @@ public class History {
     }
 
     public boolean hit50Move() {
-        if (h.size() <= 100) return false;
-        Board now = h.getLast();
-        Board old = h.get(h.size()-101);
-
-        if (!boardsHaveSameNumberOfPieces(now, old)) return false;
-        return allPawnsInSamePositions(now, old);
+        return halfmoveClock >= 100;
     }    
 
-    private boolean boardsHaveSameNumberOfPieces(Board b1, Board b2) {
-        // compare piece numbers (different # == capture)
-        int numPiecesB1 = b1.countPieces();
-        int numPiecesB2 = b2.countPieces();
-        return numPiecesB1 == numPiecesB2;
+    public boolean whiteToMove() {
+        return h.size() % 2 == 1;
     }
 
-    private boolean allPawnsInSamePositions(Board b1, Board b2) {
-        // check positions of all pawns (not totally equivalent == pawn moved)
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                Piece b1Piece = b1.getPiece(i, j);
-                Piece b2Piece = b2.getPiece(i, j);
-                if (b1Piece != null && b1Piece.getType().equals("")) {
-                    String color = b1Piece.getColor();
-                    if (b2Piece == null) return false;
-                    if (!b2Piece.getType().equals("")) return false;
-                    if (!b2Piece.getColor().equals(color)) return false;
-                } else if (b2Piece != null && b2Piece.getType().equals("")) {
-                    return false;
-                }
-            }
-        }
-        return true;
+    public int[] getEnPassantSquare() {
+        return new int[] {enPassantX, enPassantY};
     }
 
+    public int getHalfmoveClock() {
+        return halfmoveClock;
+    }
+
+    public int getFullmoveCount() {
+        return (h.size() + 1) / 2;
+    }
 }
