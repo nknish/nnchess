@@ -29,9 +29,25 @@ public class Player {
         while (true) {
             System.out.print("Enter your move: ");
             String moveString = s.nextLine();
+            String pr = "";
             for (Move m : moves) {
                 if (m.toString().equals(moveString)) {
-                    return m;
+                    if (m.isPromotion()) {
+                        if (pr.equals("")) {
+                            while (true) {
+                                System.out.print("Choose promotion piece: ");
+                                pr = s.nextLine();
+                                if (pr.equals("q") || pr.equals("r") || pr.equals("b") || pr.equals("n")) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (m.getPromotionPiece().equals(pr)) {
+                            return m;
+                        }
+                    } else {
+                        return m;
+                    }
                 }
             }
         }
