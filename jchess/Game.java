@@ -20,8 +20,7 @@ public class Game {
     }
 
     public void display() {
-        System.out.println();
-        b.display();
+        System.out.print(b + "\n");
     }
 
     public void move() {
@@ -63,7 +62,16 @@ public class Game {
                 return "checkmate! white wins";
             }
         }
-        return "draw";
+        if (h.hit3MoveRepetition()) {
+            return "draw by repetition";
+        }
+        if (h.hit50Move()) {
+            return "draw by 50-move rule";
+        }
+        if (v.bothInsufficientMaterial(b.getCopy())) {
+            return "draw by insufficient material";
+        }
+        return "draw by stalemate";
     }
 
     public void saveFEN(String fname) {

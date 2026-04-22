@@ -1,5 +1,7 @@
 package jchess;
 
+import java.lang.StringBuilder;
+
 public class Board {
     private Piece[][] pieces;
 
@@ -39,23 +41,6 @@ public class Board {
                 }
             }
         }
-    }
-
-    public void display() {
-        for (int i = 7; i >= 0; i--) {
-            Piece[] row = pieces[i];
-            System.out.print(" " + (i + 1) + "|");
-            for (Piece p : row) {
-                if (p == null) {
-                    System.out.print(" .");
-                } else {
-                    System.out.print(" " + p);
-                }
-            }
-            System.out.println();
-        }
-        System.out.println("   ----------------");
-        System.out.println("    a b c d e f g h");
     }
 
     public Board getCopy() {
@@ -120,6 +105,26 @@ public class Board {
         if (move.isPromotion()) {
             pieces[to[0]][to[1]] = new Piece(move.getPromotionPiece(), p.getColor());
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 7; i >= 0; i--) {
+            Piece[] row = pieces[i];
+            sb.append(" " + (i + 1) + "|");
+            for (Piece p : row) {
+                if (p == null) {
+                    sb.append(" .");
+                } else {
+                    sb.append(" " + p);
+                }
+            }
+            sb.append("\n");
+        }
+        sb.append("   ----------------\n");
+        sb.append("    a b c d e f g h\n");
+        return sb.toString();
     }
 
     @Override
