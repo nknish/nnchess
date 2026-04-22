@@ -216,8 +216,25 @@ public class Validator {
     }
 
     public boolean bothInsufficientMaterial(Board b) {
-        return b.countPieces() == 2;
-        // TODO determine what constitutes insufficient material
+        if (b.countPieces() == 2) return true;  // just kings (insufficient)
+        if (b.countPieces() > 4) return false;  // 3+ non-king pieces (sufficient)
+        boolean just3 = b.countPieces() == 3;  
+        int p1SquareColor = -1;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Piece p = b.getPiece(i, j);
+                if (p == null || p.getType().equals("k")) continue;
+                if (p.getType().equals("") || p.getType().equals("q") || p.getType().equals("r")) return false;
+                if (just3) return true;  // if just 3, bishop/knight insufficient
+                if (p.getType().equals("n")) return false;  // knight + x sufficient
+                if (p1SquareColor == -1) {
+                    p1SquareColor = (i % 2 + j % 2) % 2;  // log square color for b1
+                } else {
+                    return p1SquareColor == (i % 2 + j % 2) % 2;  // b2: same square color insufficient
+                }
+            }
+        }
+        throw new RuntimeException("insufficient material check failed");
     }
 
     public boolean isCheckmated(Board b, History h, String c) {
