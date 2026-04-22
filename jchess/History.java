@@ -193,7 +193,7 @@ public class History {
             Math.max(whiteLostOO, whiteLostOOO), 
             Math.max(blackLostOO, (blackLostOOO == -1) ? 0 : blackLostOOO)
         );
-        List<Board> lookback = h.subList(mostRecentCastlingRightsChange, h.size()).reversed();
+        List<Board> lookback = h.subList(mostRecentCastlingRightsChange, h.size() - 1).reversed();
 
         // count each identical board in the lookback window
         for (Board old : lookback) {
