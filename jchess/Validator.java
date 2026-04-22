@@ -177,12 +177,30 @@ public class Validator {
     private ArrayList<Move> getCastleMoves(Board b, History h, Piece p) {
         ArrayList<Move> moves = new ArrayList<>();
         int x = p.getColor().equals("w") ? 0 : 7;
+        int[] yBetweenKingside = new int[] {5, 6};
+        int[] yBetweenQueenside = new int[] {1, 2, 3};
 
         if (h.hasKingsideCastle(p.getColor())) {
-            moves.add(new Move(p.getType(), x, 4, x, 6, "castle"));
+            boolean kingsideBlocked = false;
+            for (int y : yBetweenKingside) {
+                if (b.getPiece(x, y) != null) {
+                    kingsideBlocked = true;
+                }
+            }
+            if (!kingsideBlocked) {
+                moves.add(new Move(p.getType(), x, 4, x, 6, "castle"));
+            }
         }
         if (h.hasQueensideCastle(p.getColor())) {
-            moves.add(new Move(p.getType(), x, 4, x, 1, "castle"));
+            boolean queensideBlocked = false;
+            for (int y : yBetweenQueenside) {
+                if (b.getPiece(x, y) != null) {
+                    queensideBlocked = true;
+                }
+            }
+            if (!queensideBlocked) {
+                moves.add(new Move(p.getType(), x, 4, x, 1, "castle"));
+            }
         }
 
         return moves;
