@@ -24,7 +24,9 @@ public class Validator {
         ArrayList<Move> moves = new ArrayList<>();
         for (Move m : possibleMoves) {
             if (!causesCheck(b.getCopy(), h, m, color)) {
-                // TODO shouldn't be able to castle out of check
+                if (m.isCastle() && isInCheck(b, h, color)) {
+                    continue;
+                }
                 moves.add(m);
             }
         }
@@ -62,15 +64,17 @@ public class Validator {
                 intermediateMoves.add(new Move("k", fromX,fromY,toX, toY+2));
             }
             for (Move intM : intermediateMoves) {
-                if (causesCheck(b, h, intM, c)) return true;
+                if (causesCheck(b.getCopy(), h, intM, c)) return true;
             }
         }
         
         // make move (on copied board) and see where the king is
         b.makeMove(m);
+        return isInCheck(b, h, c);
+    }
+
+    private boolean isInCheck(Board b, History h, String c) {
         int[] kingPos = b.findKing(c);
-        
-        // if the opponent could capture the king after this move, it's illegal
         String opponentColor = c.equals("w") ? "b" : "w";
         List<Move> opponentNextMoves = getMovesIgnoringCheck(b, h, opponentColor);
         for (Move opponentMove : opponentNextMoves) {
@@ -81,6 +85,7 @@ public class Validator {
 
         }
         return false;
+
     }
 
     private List<Move> getMoves(Board b, History h, Piece p, int x, int y) {
