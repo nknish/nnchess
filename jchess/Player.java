@@ -1,3 +1,5 @@
+package jchess;
+
 import java.util.List;
 import java.util.Scanner;
 

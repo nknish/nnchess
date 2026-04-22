@@ -1,3 +1,5 @@
+package jchess;
+
 public class Move {
     private String piece;
     private int fromX, fromY, toX, toY;

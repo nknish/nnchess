@@ -1,3 +1,5 @@
+package jchess;
+
 // TODO check for off-by-one errors in 50-move and 3-move
 
 import java.util.ArrayList;

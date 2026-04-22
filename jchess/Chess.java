@@ -1,3 +1,5 @@
+package jchess;
+
 public class Chess {
     public static void main(String[] args) {
         Game g = new Game();

@@ -1,3 +1,5 @@
+package jchess;
+
 public class Board {
     private Piece[][] pieces;
 
