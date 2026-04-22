@@ -12,7 +12,7 @@ public class Game {
         b = new Board();
         h = new History(b.getCopy());
         v = new Validator();
-        white = new Player(true);
+        white = new Player(false);
         black = new Player(false);
         whiteToMove = true;
     }
@@ -62,5 +62,9 @@ public class Game {
             }
         }
         return "draw";
+    }
+
+    public void saveFEN(String fname) {
+        SaveLoad.saveFEN(b, h, fname);
     }
 }

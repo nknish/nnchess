@@ -26,8 +26,6 @@ public class History {
     }
 
     public void logBoard(Board b) {
-        enPassantX = -1;
-        enPassantY = -1;
         h.add(b);
         logKingMoves(b);
         logRookMovesAndCaptures(b);
@@ -83,6 +81,9 @@ public class History {
 
     private void logPawn2SquareMoves(Board b) {
         // check for next move en passant legality
+        enPassantX = -1;
+        enPassantY = -1;
+
         Board prev = h.get(h.size()-2);
         for (int i = 0; i < 8; i++) {
             // white pawn
@@ -104,9 +105,6 @@ public class History {
                 enPassantX = 5;
                 enPassantY = i;
             }
-        }
-        if (enPassantX != -1) {
-            System.out.println("possible ep on " + enPassantX + "," + enPassantY);
         }
     }
 
