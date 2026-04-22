@@ -20,11 +20,11 @@ public class Validator {
     };
 
     public List<Move> getMoves(Board b, History h, String color) {
-        // TODO shouldn't be able to castle out of check
         List<Move> possibleMoves = getMovesIgnoringCheck(b, h, color);
         ArrayList<Move> moves = new ArrayList<>();
         for (Move m : possibleMoves) {
             if (!causesCheck(b.getCopy(), h, m, color)) {
+                // TODO shouldn't be able to castle out of check
                 moves.add(m);
             }
         }
@@ -48,9 +48,29 @@ public class Validator {
     }
 
     private boolean causesCheck(Board b, History h, Move m, String c) {
+        // if move is a castle, recursively check intermediate moves for check
+        if (m.isCastle()) {
+            ArrayList<Move> intermediateMoves = new ArrayList<>();
+            int fromX = m.getFrom()[0];
+            int fromY = m.getFrom()[1];
+            int toX = m.getTo()[0];
+            int toY = m.getTo()[1];
+            if (m.getTo()[1] == 6) {  // kingside
+                intermediateMoves.add(new Move(c, fromX,fromY,toX, toY-1));
+            } else {  // queenside
+                intermediateMoves.add(new Move("k", fromX,fromY,toX, toY+1));
+                intermediateMoves.add(new Move("k", fromX,fromY,toX, toY+2));
+            }
+            for (Move intM : intermediateMoves) {
+                if (causesCheck(b, h, intM, c)) return true;
+            }
+        }
+        
+        // make move (on copied board) and see where the king is
         b.makeMove(m);
         int[] kingPos = b.findKing(c);
         
+        // if the opponent could capture the king after this move, it's illegal
         String opponentColor = c.equals("w") ? "b" : "w";
         List<Move> opponentNextMoves = getMovesIgnoringCheck(b, h, opponentColor);
         for (Move opponentMove : opponentNextMoves) {
@@ -59,7 +79,6 @@ public class Validator {
                 return true;
             }
 
-            // TODO if castling, also check intermediate spaces for king
         }
         return false;
     }
