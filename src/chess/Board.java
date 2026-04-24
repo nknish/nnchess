@@ -57,7 +57,7 @@ public class Board {
     public int[] findKing(String c) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (pieces[i][j] != null && pieces[i][j].getType().equals("k") && pieces[i][j].getColor().equals(c)) {
+                if (pieces[i][j] != null && pieces[i][j].isType("k") && pieces[i][j].isColor(c)) {
                     return new int[] { i, j };
                 }
             }

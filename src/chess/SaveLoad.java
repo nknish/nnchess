@@ -20,9 +20,9 @@ public class SaveLoad {
                         sb.append(numBlank);
                         numBlank = 0;
                     }
-                    if (p.getType().equals("")) {
-                        sb.append(p.getColor().equals("w") ? "P" : "p");
-                    } else if (p.getColor().equals("w")) {
+                    if (p.isType("")) {
+                        sb.append(p.isColor("w") ? "P" : "p");
+                    } else if (p.isColor("w")) {
                         sb.append(p.getType().toUpperCase());
                     } else {
                         sb.append(p.getType());

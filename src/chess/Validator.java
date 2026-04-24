@@ -40,7 +40,7 @@ public class Validator {
                 Piece p = b.getPiece(i, j);
                 if (p == null)
                     continue;
-                if (!p.getColor().equals(color))
+                if (!p.isColor(color))
                     continue;
                 List<Move> pieceMoves = getMoves(b.getCopy(), h, p, i, j);
                 moves.addAll(pieceMoves);
@@ -143,7 +143,7 @@ public class Validator {
                 Piece pieceInTheWay = b.getPiece(newX, newY);
                 if (pieceInTheWay == null) {
                     moves.add(new Move(p.getType(), x, y, newX, newY));
-                } else if (b.getPiece(newX, newY).getColor().equals(p.getColor())) {
+                } else if (b.getPiece(newX, newY).isSameColor(p)) {
                     break;
                 } else {
                     moves.add(new Move(p.getType(), x, y, newX, newY));
@@ -166,7 +166,7 @@ public class Validator {
                 continue;
             }
             Piece pieceInTheWay = b.getPiece(newX, newY);
-            if (pieceInTheWay != null && pieceInTheWay.getColor().equals(p.getColor())) {
+            if (pieceInTheWay != null && pieceInTheWay.isSameColor(p)) {
                 continue;
             }
             moves.add(new Move(p.getType(), x, y, newX, newY));
@@ -176,7 +176,7 @@ public class Validator {
 
     private ArrayList<Move> getCastleMoves(Board b, History h, Piece p) {
         ArrayList<Move> moves = new ArrayList<>();
-        int x = p.getColor().equals("w") ? 0 : 7;
+        int x = p.isColor("w") ? 0 : 7;
         int[] yBetweenKingside = new int[] {5, 6};
         int[] yBetweenQueenside = new int[] {1, 2, 3};
 
@@ -209,8 +209,7 @@ public class Validator {
     private List<Move> getPawnMoves(Board b, History h, int x, int y) {
         ArrayList<Move> moves = new ArrayList<>();
         Piece p = b.getPiece(x, y);
-        String color = p.getColor();
-        int dir = color.equals("w") ? 1 : -1;
+        int dir = p.isColor("w") ? 1 : -1;
 
         // get forward moves (1 or spaces 2) including promotions
         if (b.getPiece(x + dir, y) == null) {
@@ -226,7 +225,7 @@ public class Validator {
         // get captures, including promotions and en passant
         if (y > 0) {
             Piece c1 = b.getPiece(x + dir, y - 1);
-            if (c1 != null && !c1.getColor().equals(color)) {
+            if (c1 != null && !c1.isSameColor(p)) {
                 moves.addAll(getPawnMovesIncludingPromotion(p, x, y, x + dir, y - 1));
             } else if (c1 == null && h.canEnPassantTo(x + dir, y - 1)) {
                 moves.add(new Move(p.getType(), x, y, x + dir, y - 1, "ep"));
@@ -234,7 +233,7 @@ public class Validator {
         }
         if (y < 7) {
             Piece c2 = b.getPiece(x + dir, y + 1);
-            if (c2 != null && !c2.getColor().equals(color)) {
+            if (c2 != null && !c2.isSameColor(p)) {
                 moves.addAll(getPawnMovesIncludingPromotion(p, x, y, x + dir, y + 1));
             } else if (c2 == null && h.canEnPassantTo(x + dir, y + 1)) {
                 moves.add(new Move(p.getType(), x, y, x + dir, y + 1, "ep"));
@@ -265,10 +264,10 @@ public class Validator {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Piece p = b.getPiece(i, j);
-                if (p == null || p.getType().equals("k")) continue;
-                if (p.getType().equals("") || p.getType().equals("q") || p.getType().equals("r")) return false;
+                if (p == null || p.isType("k")) continue;
+                if (p.isType("") || p.isType("q") || p.isType("r")) return false;
                 if (just3) return true;  // if just 3, bishop/knight insufficient
-                if (p.getType().equals("n")) return false;  // knight + x sufficient
+                if (p.isType("n")) return false;  // knight + x sufficient
                 if (p1SquareColor == -1) {
                     p1SquareColor = (i % 2 + j % 2) % 2;  // log square color for b1
                 } else {

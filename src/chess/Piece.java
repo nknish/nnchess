@@ -24,6 +24,22 @@ public class Piece {
         return type;
     }
 
+    public boolean isType(String t) {
+        return type.equals(t);
+    }
+
+    public boolean isColor(String c) {
+        return color.equals(c);
+    }
+
+    public boolean isSameType(Piece p2) {
+        return (p2 != null && type.equals(p2.getType()));
+    }
+
+    public boolean isSameColor(Piece p2) {
+        return (p2 != null && p2.getColor().equals(color));
+    }
+
     @Override
     public Piece clone() {
         return new Piece(type, color);

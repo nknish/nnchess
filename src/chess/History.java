@@ -39,14 +39,14 @@ public class History {
         // check for king moves
         if (hasKingsideCastle("w") || hasQueensideCastle("w")) {
             Piece p = b.getPiece(0, 4);
-            if (p == null || !p.getType().equals("k") || !p.getColor().equals("w")) {
+            if (p == null || !p.isType("k") || !p.isColor("w")) {
                 whiteLostOO = getMoveNumber();
                 whiteLostOOO = getMoveNumber();
             }
         }
         if (hasKingsideCastle("b") || hasQueensideCastle("b")) {
             Piece p = b.getPiece(7, 4);
-            if (p == null || !p.getType().equals("k") || !p.getColor().equals("b")) {
+            if (p == null || !p.isType("k") || !p.isColor("b")) {
                 blackLostOO = getMoveNumber();
                 blackLostOOO = getMoveNumber();
             }
@@ -57,25 +57,25 @@ public class History {
         // check for rook moves/captures
         if (hasKingsideCastle("w")) {
             Piece p = b.getPiece(0, 7);
-            if (p == null || !p.getType().equals("r") || !p.getColor().equals("w")) {
+            if (p == null || !p.isType("r") || !p.isColor("w")) {
                 whiteLostOO = getMoveNumber();
             }
         }
         if (hasQueensideCastle("w")) {
             Piece p = b.getPiece(0, 0);
-            if (p == null || !p.getType().equals("r") || !p.getColor().equals("w")) {
+            if (p == null || !p.isType("r") || !p.isColor("w")) {
                 whiteLostOOO = getMoveNumber();
             }
         }
         if (hasKingsideCastle("b")) {
             Piece p = b.getPiece(7, 7);
-            if (p == null || !p.getType().equals("r") || !p.getColor().equals("b")) {
+            if (p == null || !p.isType("r") || !p.isColor("b")) {
                 blackLostOO = getMoveNumber();
             }
         }
         if (hasQueensideCastle("b")) {
             Piece p = b.getPiece(7, 0);
-            if (p == null || !p.getType().equals("r") || !p.getColor().equals("b")) {
+            if (p == null || !p.isType("r") || !p.isColor("b")) {
                 blackLostOOO = getMoveNumber();
             }
         }
@@ -91,9 +91,9 @@ public class History {
             // white pawn
             Piece p = b.getPiece(3, i);
             if (p == null) continue;
-            if (!p.getType().equals("") || !p.getColor().equals("w"))
+            if (!p.isType("") || !p.isColor("w"))
                 continue;
-            if (prev.getPiece(3, i) == null && b.getPiece(1, i) == null && prev.getPiece(1, i) != null && prev.getPiece(1, i).getType().equals("")) {
+            if (prev.getPiece(3, i) == null && b.getPiece(1, i) == null && prev.getPiece(1, i) != null && prev.getPiece(1, i).isType("")) {
                 enPassantX = 2;
                 enPassantY = i;
             }
@@ -101,9 +101,9 @@ public class History {
             // black pawn
             p = b.getPiece(4, i);
             if (p == null) continue;
-            if (!p.getType().equals("") || !p.getColor().equals("b"))
+            if (!p.isType("") || !p.isColor("b"))
                 continue;
-            if (prev.getPiece(4, i) == null && b.getPiece(6, i) == null && prev.getPiece(6, i) != null && prev.getPiece(6, i).getType().equals("")) {
+            if (prev.getPiece(4, i) == null && b.getPiece(6, i) == null && prev.getPiece(6, i) != null && prev.getPiece(6, i).isType("")) {
                 enPassantX = 5;
                 enPassantY = i;
             }
@@ -130,7 +130,7 @@ public class History {
 
                 // 1 null
                 if (p1 == null) {
-                    if (p2.getType().equals("")) {
+                    if (p2.isType("")) {
                         halfmoveClock = 0;
                         return;
                     } else {
@@ -138,7 +138,7 @@ public class History {
                     }
                 }
                 if (p2 == null) {
-                    if (p1.getType().equals("")) {
+                    if (p1.isType("")) {
                         halfmoveClock = 0;
                         return;
                     } else {
@@ -147,11 +147,11 @@ public class History {
                 }
 
                 // neither null
-                if (p1.getType().equals("") && !p2.getType().equals("")) {
+                if (p1.isType("") && !p2.isType("")) {
                     halfmoveClock = 0;
                     return;
                 }
-                if (p2.getType().equals("") && !p1.getType().equals("")) {
+                if (p2.isType("") && !p1.isType("")) {
                     halfmoveClock = 0;
                     return;
                 }
