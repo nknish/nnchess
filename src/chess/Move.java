@@ -1,4 +1,4 @@
-package jchess;
+package chess;
 
 public class Move {
     private String piece;

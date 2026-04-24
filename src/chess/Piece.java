@@ -1,4 +1,4 @@
-package jchess;
+package chess;
 
 // TODO maybe...make a null piece its own type? no blank squares?
 public class Piece {
