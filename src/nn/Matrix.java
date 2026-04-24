@@ -5,30 +5,59 @@ public class Matrix {
     private int rows;
     private int cols;
 
-    // initialize random/zero matrix with specified dimensions
-    public Matrix(int rows, int cols, boolean random) {
+    // xavier-initialize random matrix with specified dimensions
+    public Matrix(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
         m = new float[rows][cols];
-        if (random) {
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    m[i][j] = (float) (2 * Math.random() - 1);
-                }
+        double scale = 1.0 / Math.sqrt(cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                m[i][j] = (float) (scale * (2 * RNG.rand() - 1));
             }
         }
     }
 
     // initialize matrix with given values
     public Matrix(float[][] data) {
-        rows = m.length;
-        cols = m[0].length;
+        rows = data.length;
+        cols = data[0].length;
         m = new float[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 m[i][j] = data[i][j];
             }
         }
+    }
+
+    // add to another matrix of the same dimensions
+    public Matrix add(Matrix m2) {
+        if (rows != m2.getNumRows() || cols != m2.getNumCols()) {
+            throw new IllegalArgumentException(
+                    "can't add " + rows + "x" + cols + " by " + m2.getNumRows() + "x" + m2.getNumCols());
+        }
+        float[][] sum = new float[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                sum[i][j] = m[i][j] + m2.get(i, j);
+            }
+        }
+        return new Matrix(sum);
+    }
+
+    // subtract another matrix of the same dimensions
+    public Matrix sub(Matrix m2) {
+        if (rows != m2.getNumRows() || cols != m2.getNumCols()) {
+            throw new IllegalArgumentException(
+                    "can't add " + rows + "x" + cols + " by " + m2.getNumRows() + "x" + m2.getNumCols());
+        }
+        float[][] diff = new float[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                diff[i][j] = m[i][j] - m2.get(i, j);
+            }
+        }
+        return new Matrix(diff);
     }
 
     // multiply by another matrix
@@ -57,13 +86,6 @@ public class Matrix {
             throw new IllegalArgumentException(
                     "can't multiply " + rows + "x" + cols + " matrix by " + v.getDim() + "-dim vector");
         }
-
-        System.out.println("vector:");
-        System.out.println(v);
-
-        System.out.println("matrix:");
-        System.out.println(this);
-
         float[] prod = new float[rows];
         for (int i = 0; i < rows; i++) {
             prod[i] = 0;
@@ -73,6 +95,28 @@ public class Matrix {
         }
 
         return new Vector(prod);
+    }
+
+    // multiply by a scalar
+    public Matrix mul(float a) {
+        float[][] prod = new float[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                prod[i][j] = a * m[i][j];
+            }
+        }
+        return new Matrix(prod);
+    }
+
+    // transpose the matrix
+    public Matrix t() {
+        float[][] transposed = new float[cols][rows];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                transposed[j][i] = m[i][j];
+            }
+        }
+        return new Matrix(transposed);
     }
 
     // get a single value from the matrix
@@ -95,9 +139,10 @@ public class Matrix {
             for (int j = 0; j < cols; j++) {
                 s += m[i][j] + " ";
             }
-            s += "\n";
+            if (i + 1 < rows) {
+                s += "\n";
+            }
         }
         return s;
     }
-
 }

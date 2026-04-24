@@ -6,6 +6,8 @@ public class Layer {
     private String activation;
     private Matrix weights;
     private Vector biases;
+    private Vector inputs;
+    private Vector nodes;
     private Vector activations;
 
     // new layer with specified width, width of input, and activation function
@@ -13,18 +15,30 @@ public class Layer {
         this.width = width;
         this.inputWidth = inputWidth;
         this.activation = activation;
-        weights = new Matrix(width, inputWidth, true);
-        biases = new Vector(width, true);
+        weights = new Matrix(width, inputWidth);
+        biases = new Vector(width);
     }
 
     // feed forward inputs by multiplying by weights and applying activation
     public void forward(Vector inputs) {
-        System.out.println("feeding forward");
-        Vector nodes = weights.mul(inputs).add(biases);
-        System.out.println("applied weights and biases");
-        System.out.println(nodes);
+        this.inputs = inputs;
+        nodes = weights.mul(inputs).add(biases);
         activations = nodes.activate(activation);
-        System.out.println("applied activation");
+    }
+
+    // update weights and backpropagate gradient
+    public Vector backward(Vector grad, float lr) {
+        // compute gradients
+        Vector dldz = grad.mul(nodes.grad(activation));
+        Matrix dldW = dldz.outer(inputs);
+        Vector dldx = weights.t().mul(dldz);
+
+        // update weights and biases
+        weights = weights.sub(dldW.mul(lr));
+        biases = biases.sub(dldz.mul(lr));
+
+        // backpropagate
+        return dldx;
     }
 
     // return the activations (output)
