@@ -1,5 +1,8 @@
 package nn;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class RNG {
@@ -21,6 +24,15 @@ public class RNG {
             throw new UnsupportedOperationException("RNG needs to be seeded");
         }
         return gen.nextFloat();
+    }
+
+    public static List<Integer> shuffleIndices(int len) {
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < len; i++) {
+            indices.add(i);
+        }
+        Collections.shuffle(indices, gen);
+        return indices;
     }
 
     private RNG() {

@@ -6,14 +6,16 @@ public class Matrix {
     private int cols;
 
     // xavier-initialize random matrix with specified dimensions
-    public Matrix(int rows, int cols) {
+    public Matrix(int rows, int cols, boolean random) {
         this.rows = rows;
         this.cols = cols;
         m = new float[rows][cols];
-        double scale = 1.0 / Math.sqrt(cols);
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                m[i][j] = (float) (scale * (2 * RNG.rand() - 1));
+        if (random) {
+            double scale = 1.0 / Math.sqrt(cols);
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    m[i][j] = (float) (scale * (2 * RNG.rand() - 1));
+                }
             }
         }
     }

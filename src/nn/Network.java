@@ -56,28 +56,33 @@ public class Network {
         return predicteds;
     }
     
-    public void train(List<Vector> x, List<Vector> y, float lr) {
-        train(x, y, lr, Math.max(x.size() / 100, 5));
-    }
-
-    public void train(List<Vector> x, List<Vector> y, float lr, int updateFrequency) {
+    // train the network, applying gradients and printing loss every batch
+    public void train(List<Vector> x, List<Vector> y, int batchSize, int epochs, float lr) {
         if (x.size() != y.size()) {
             throw new IllegalArgumentException("x and y sizes must match");
         }
-        for (int i = 0; i < x.size(); i++) {
-            forward(x.get(i));
-            runningLoss += loss(y.get(i));
-            if (i > 0 && i % updateFrequency == 0) {
-                runningLoss /= updateFrequency;
-                System.out.println("avg loss before step " + i + ": " + runningLoss);
-                runningLoss = 0;
+        for (int epoch = 0; epoch < epochs; epoch++) {
+            List<Integer> indices = RNG.shuffleIndices(x.size());
+            int batchCount = 0;
+            int samplesThisBatch = 0;
+            for (int i : indices) {
+                forward(x.get(i));
+                runningLoss += loss(y.get(i));
+                backward();
+                samplesThisBatch++;
+                if (samplesThisBatch == batchSize || indices.getLast() == i) {
+                    applyGradients(samplesThisBatch, lr);
+                    runningLoss /= samplesThisBatch;
+                    System.out.println("avg loss epoch " + (epoch + 1) + " batch " + (batchCount + 1) + ": " + runningLoss);
+                    runningLoss = 0;
+                    samplesThisBatch = 1;
+                    batchCount++;
+                }
             }
-            backward(lr);
         }
     }
 
-    // feed an input through all layers and store the output
-    public void forward(Vector input) {
+    private void forward(Vector input) {
         if (input.getDim() != inputWidth) {
             throw new IllegalArgumentException("input vector has wrong dim");
         }
@@ -90,16 +95,22 @@ public class Network {
         predicted = layers[depth - 1].getActivations();
     }
 
-    public float loss(Vector expected) {
+    private float loss(Vector expected) {
         lossGrad = predicted.sub(expected);
         return lossGrad.rms();
     }
 
-    public void backward(float lr) {
+    private void backward() {
         Vector grad = lossGrad;
         for (int i = depth - 1; i >= 0; i--) {
             Layer l = layers[i];
-            grad = l.backward(grad, lr);
+            grad = l.backward(grad);
+        }
+    }
+
+    private void applyGradients(int batchSize, float lr) {
+        for (Layer l : layers) {
+            l.applyGradients(batchSize, lr);
         }
     }
 
