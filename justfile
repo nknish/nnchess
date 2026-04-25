@@ -1,6 +1,3 @@
-default:
-    echo 'Hello, world!'
-
 chess:
     java src/chess/Chess.java
 
