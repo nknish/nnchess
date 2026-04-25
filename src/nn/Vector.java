@@ -28,6 +28,14 @@ public class Vector {
         }
         return new Vector(sum);
     }
+    
+    // add another vector of the same dimension (in place on v1)
+    public void addInPlace(Vector v2) {
+        verifySameDim(v2, "addition");
+        for (int i = 0; i < dim; i++) {
+            v[i] += v2.get(i);
+        }
+    }
 
     // subtract another vector of the same dimension
     public Vector sub(Vector v2) {

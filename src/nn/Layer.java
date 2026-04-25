@@ -38,8 +38,8 @@ public class Layer {
         Vector dldx = weights.t().mul(dldz);
 
         // update accumulated gradients for weights and biases
-        weightsGrad = weightsGrad.add(dldW);
-        biasesGrad = biasesGrad.add(dldz);
+        weightsGrad.addInPlace(dldW);
+        biasesGrad.addInPlace(dldz);
 
         // backpropagate
         return dldx;

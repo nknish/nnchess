@@ -34,10 +34,7 @@ public class Matrix {
 
     // add to another matrix of the same dimensions
     public Matrix add(Matrix m2) {
-        if (rows != m2.getNumRows() || cols != m2.getNumCols()) {
-            throw new IllegalArgumentException(
-                    "can't add " + rows + "x" + cols + " by " + m2.getNumRows() + "x" + m2.getNumCols());
-        }
+        verifySameDim(m2, "addition");
         float[][] sum = new float[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -47,12 +44,19 @@ public class Matrix {
         return new Matrix(sum);
     }
 
+    // add to another matrix of the same dimensions (in place on m1)
+    public void addInPlace(Matrix m2) {
+        verifySameDim(m2, "addition");
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                m[i][j] += m2.get(i, j);
+            }
+        }
+    }
+
     // subtract another matrix of the same dimensions
     public Matrix sub(Matrix m2) {
-        if (rows != m2.getNumRows() || cols != m2.getNumCols()) {
-            throw new IllegalArgumentException(
-                    "can't add " + rows + "x" + cols + " by " + m2.getNumRows() + "x" + m2.getNumCols());
-        }
+        verifySameDim(m2, "subtraction");
         float[][] diff = new float[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -132,6 +136,14 @@ public class Matrix {
 
     public int getNumCols() {
         return cols;
+    }
+
+    private void verifySameDim(Matrix m2, String operation) {
+        if (rows != m2.getNumRows() || cols != m2.getNumCols()) {
+            throw new IllegalArgumentException(
+                    operation + " not supported for matrices " + rows + "x" + cols + " and " + m2.getNumRows() + "x"
+                            + m2.getNumCols());
+        }
     }
 
     @Override
