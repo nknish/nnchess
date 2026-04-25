@@ -4,6 +4,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+        Timer.start();
+
         // metadata
         String fname = "data/data.csv"; // generated with data/gen.py
         int inputDim = 4;
@@ -14,7 +16,7 @@ public class Main {
         // hyperparameters
         int numLayers = 5;
         int layerWidth = 5;
-        int epochs = 10;
+        int epochs = 2;
         int batchSize = 10000;
         float lr = 0.1f;
 
@@ -45,5 +47,7 @@ public class Main {
         }
         meanLoss /= yTest.size();
         System.out.println("average RMSE on test data after training: " + meanLoss);
+
+        Timer.stop();
     }
 }
